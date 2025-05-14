@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tier List Game</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #game-area, #results-area {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        #choice-container {
+            display: flex;
+            flex-direction: row; /* Arrange choice buttons horizontally */
+            align-items: center; /* Vertically align items in the container */
+            justify-content: center; /* Center the buttons horizontally */
+            margin-bottom: 15px; /* Add some space below the buttons */
+        }
+
+        #choice-container button {
+            padding: 15px 30px; /* Bigger choice buttons */
+            margin: 10px;
+            cursor: pointer;
+            font-size: 1.2em;
+        }
+
+        #game-area span {
+            margin: 0 10px;
+            font-size: 1.2em;
+        }
+
+        #game-area #skip-button {
+            padding: 8px 15px; /* Smaller skip button */
+            font-size: 0.9em;
+            margin-top: 10px; /* Add a little space above the skip button */
+        }
+
+        #tier-list {
+            list-style-type: decimal;
+            padding-left: 20px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tier List Game</h1>
+
+    <div id="game-area">
+        <p>Which do you prefer?</p>
+        <div id="choice-container">
+            <button id="choice1"></button>
+            <span>vs</span>
+            <button id="choice2"></button>
+        </div>
+        <button id="skip-button">Skip & Reshuffle</button>
+        <p id="round-counter"></p>
+    </div>
+
+    <div id="results-area" style="display: none;">
+        <h2>Final Tier List</h2>
+        <ol id="tier-list"></ol>
+        <button id="restart-button">Play Again</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const choice1Button = document.getElementById('choice1');
+            const choice2Button = document.getElementById('choice2');
+            const skipButton = document.getElementById('skip-button');
+            const resultsArea = document.getElementById('results-area');
+            const tierList = document.getElementById('tier-list');
+            const restartButton = document.getElementById('restart-button');
+            const roundCounter = document.getElementById('round-counter');
+            const gameArea = document.getElementById('game-area');
+
+            const initialNames = [
+                "amen",
+                "Toy Patriot",
+                "KARMA CITY",
+                "Go Go Yuureisen/Go Go Ghost Ship",
+                "Fuefukedomo Odorazu/Flute Without Dancing",
+                "Machi/Town",
+                "Kubi-nashi Kankodori/Headless Cuckoo",
+                "PLACEBO",
+                "Black Sheep",
+                "爱丽丝 (Alice)",
+                "Will-O-Wisp",
+                "Kanden/Shock",
+                "Dagashi-ya Shoubai/Cheap Sweets Selling",
+                "Hopeland",
+                "Sange no Machi/Repentance Town",
+                "Kokoro ni Kudamono/Fruit for the Heart",
+                "Undercover",
+                "Ame no Gairo ni Yakouchuu/Night Bugs on a Rainy Street",
+                "Yasashii Hito/Kind Person",
+                "Mirage Song",
+                "Petrichor",
+                "Umi no Yuurei/Ghost of the Sea",
+                "Hana ni Arashi/Flower and Storm",
+                "Lullabye Goodbye",
+                "Shunrai/Spring Thunder",
+                "Hien/Flying Swallow",
+                "love",
+                "Santa Maria",
+                "Living Dead Youth",
+                "Fluorite",
+                "Cranberry and Pancakes",
+                "Moonlight",
+                "Gomen Ne/I'm Sorry",
+                "Flamingo",
+                "Neon Sign",
+                "Himawari/Sunflower",
+                "Saijouei/Rerun",
+                "Tabibito Dentou/Traveler's Lamp",
+                "LOSER",
+                "Nighthawks",
+                "Unbelievers",
+                "Ganpuku/Sight for Sore Eyes",
+                "Shitodo Seiten Daimeiwaku/The Trouble of Dripping Wet Sun",
+                "Hisui no Ookami/Jade Wolf",
+                "Shinzou Houei/Mental Television",
+                "MAD HEAD LOVE",
+                "Haiiro to Ao/Gray and Blue",
+                "Melancholy Kitchen",
+                "TEENAGE RIOT",
+                "Eine Kleine",
+                "orion",
+                "Machigai Sagashi/Spot the Difference",
+                "fogbound",
+                "Hikarabita Basu Hitotsu/One Stale Bus",
+                "Poppin' Apathy",
+                "Horafuki Nekoyarou/Braggart Alleycats",
+                "Tori ni demo Naritai/Wanna Be A Bird At Least",
+                "Shouhon/Excerpt",
+                "Atashi wa Yuurei/I'm A Ghost",
+                "Campanella",
+                "Paper Flower",
+                "Canary",
+                "WOODEN DOLL",
+                "Mayoeru Hitsuji/Stray Sheep",
+                "Uchiage Hanabi/Fireworks",
+                "Hyakkiyakou/Pandemonium",
+                "Number Nine",
+                "Amefuri Fujin/Rain Woman",
+                "Disco Balloon",
+                "Paprika",
+                "Donut Hole",
+                "Desho Masho/Let's / Isn't It",
+                "Peace Sign",
+                "TOXIC BOY",
+                "Blue Jasmine",
+                "Neighbourhood",
+                "Umi to Sanshouuo/The Sea and the Salamander",
+                "Caribou",
+                "Metronome",
+                "Suna no Wakusei/Sand Planet",
+                "Flowerwall",
+                "Lemon",
+                "Koi to Byounetsu/Love and Fever",
+                "Décolleté",
+                "Uma to Shika/Horse and Deer",
+                "Vivi",
+                "Cinderella Gray",
+                "Pale Blue",
+                "Yume Utsutsu/Half-Dreaming",
+                "Shinigami",
+                "POP SONG",
+                "M87",
+                "ETA",
+                "KICK BACK",
+                "Hazukashikutte Shou ga Nee/Y'all Should Be Ashamed",
+                "LADY",
+                "Tsuki o Miteita/Moongazing",
+                "Chikyuugi/Globe",
+                "Sayoonara Mata Itsuka!/Bye Now, See You Someday!",
+                "Mainichi/Every Day",
+                "RED OUT",
+                "Garakuta/Junk",
+                "Margherita",
+                "Tomare Miyo/Stop, Look Both Ways",
+                "LENS FLARE",
+                "YELLOW GHOST",
+                "POST HUMAN",
+                "LOST CORNER",
+                "Azalea",
+                "BOW AND ARROW",
+                "Plazma"
+            ];
+
+            let names = [...initialNames];
+            let preferences = {};
+            let comparisons = new Set();
+            let currentPair = [];
+            let roundNum = 0;
+            const maxRoundsMultiplier = 5;
+
+            if (names.length < 2) {
+                alert('Please provide at least two names in the initial list.');
+            } else {
+                names.forEach(name => preferences[name] = 0);
+                startGame();
+            }
+
+            function startGame() {
+                document.getElementById('game-area').style.display = 'block';
+                choosePair();
+            }
+
+            function choosePair() {
+                if (comparisons.size >= (names.length * (names.length - 1) / 2) * 3) {
+                    showResults();
+                    return null;
+                }
+
+                const availableNames = names.filter(name => {
+                    const maxPreference = Object.values(preferences).length > 0 ? Math.max(...Object.values(preferences)) : 0;
+                    return !(preferences[name] >= maxPreference + 2 && Object.keys(preferences).length > 2);
+                });
+
+                if (availableNames.length < 2) {
+                    showResults();
+                    return null;
+                }
+
+                let name1, name2;
+                do {
+                    const sample = getRandomSubset(availableNames, 2);
+                    name1 = sample[0];
+                    name2 = sample[1];
+                } while (comparisons.has(name1 + '-' + name2) || comparisons.has(name2 + '-' + name1));
+
+                currentPair = [name1, name2];
+                choice1Button.textContent = name1;
+                choice2Button.textContent = name2;
+                roundCounter.textContent = `Round: ${++roundNum}`;
+                return currentPair;
+            }
+
+            function getRandomSubset(array, size) {
+                const shuffled = [...array].sort(() => 0.5 - Math.random());
+                return shuffled.slice(0, size);
+            }
+
+            choice1Button.addEventListener('click', () => {
+                if (currentPair.length === 2) {
+                    preferences[currentPair[0]]++;
+                    comparisons.add(currentPair[0] + '-' + currentPair[1]);
+                    choosePair();
+                }
+            });
+
+            choice2Button.addEventListener('click', () => {
+                if (currentPair.length === 2) {
+                    preferences[currentPair[1]]++;
+                    comparisons.add(currentPair[0] + '-' + currentPair[1]);
+                    choosePair();
+                }
+            });
+
+            skipButton.addEventListener('click', () => {
+                if (currentPair.length === 2) {
+                    choosePair();
+                }
+            });
+
+            function showResults() {
+                gameArea.style.display = 'none';
+                resultsArea.style.display = 'block';
+                const sortedNames = Object.entries(preferences).sort(([, a], [, b]) => b - a);
+                tierList.innerHTML = '';
+                sortedNames.forEach(([name, score], index) => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `${index + 1}. ${name} (Wins: {score})`;
+                    tierList.appendChild(listItem);
+                });
+            }
+
+            restartButton.addEventListener('click', () => {
+                resultsArea.style.display = 'none';
+                names = [...initialNames];
+                preferences = {};
+                comparisons.clear();
+                roundNum = 0;
+                startGame();
+            });
+        });
+    </script>
+</body>
+</html>
